@@ -1,0 +1,26 @@
+分解：将序列划分为两部分
+解决：让子序列有序
+合并：合并排序后的两个子序列
+class Solution:
+    def divide(self,list):
+        if len(list) <= 1:
+            return list
+        mid = int(len(list)/2)
+        left = self.divide(list[:mid])   #递归
+        right = self.divide(list[mid:])  
+        return self.merge_sort(left,right) #返回排好序的子序列
+        
+    def merge_sort(self,left,right):
+        i,j = 0,0
+        res = []
+        while i < len(left) and j < len(right):
+            if left[i] <= right[j]:
+                res.append(left[i])
+                i += 1
+            else:
+                res.append(right[j])
+                j += 1
+        res.extend(left[i:])
+        res.extend(right[j:])
+        return res
+    
