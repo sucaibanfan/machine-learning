@@ -1,0 +1,17 @@
+有三种葡萄，每种分别有a,b,c颗。有三个人，第一个人只吃第1,2种葡萄，第二个人只吃第2,3种葡萄，第三个人只吃第1,3种葡萄。
+适当安排三个人使得吃完所有的葡萄,并且且三个人中吃的最多的那个人吃得尽量少。
+
+def eatmost(a,b,c):
+    s = a+b+c
+    res1 = s//3
+    if s%3 != 0:
+        res1 += 1
+    m = max(a,b,c)
+    if m > 2*res1:   #比如 7,1,1
+        return -(-m//2) #不引入math模块向上取整的方法
+    return res1
+N = int(input())
+for i in range(N):
+    a,b,c = map(int,input().split())
+    print(eatmost(a,b,c))
+    
