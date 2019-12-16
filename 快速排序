@@ -1,0 +1,16 @@
+def QuickSort(array,s,t):
+    i = s
+    j = t
+    if i>=j:
+        return
+    tmp = array[s]
+    while i != j:
+        while j>i and array[j] >= tmp:
+             j -= 1
+        array[i] = array[j]
+        while i<j and array[i] <= tmp:
+            i += 1
+        array[j] = array[i]
+    array[i] = tmp
+    QuickSort(array,s,i-1)
+    QuickSort(array,i+1,t)
