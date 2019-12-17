@@ -1,0 +1,19 @@
+1、id tag
+   1  A
+   1  B
+   2  A
+   2  C
+   3  E
+  希望实现如下形式：
+  1:A B AB
+  2:A C AC
+  3:E
+  python中有一个库专门可以排列组合
+  import itertools
+  list(itertools.combinations([1,2,3,4],3))#选取三个，不考虑顺序，即数学表示中的C
+  list(itertools.permutations([1,2,3,4],2))#选取两个，考虑顺序，即数学表示中的A
+  要考虑字母顺序的话，还是加个sorted
+  
+  
+  2、用python/keras/tensorflow实现梯度下降求解lr
+  
