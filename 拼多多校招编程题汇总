@@ -1,0 +1,131 @@
+1、最大乘积
+给定一个无序数组，包含正数、负数和0，要求从中找出3个数的乘积，使得乘积最大，要求时间复杂度：O(n)，空间复杂度：O(1)
+经过分析以后发现无非两种情况，要么排序后最大三个相乘取得最大，要么两个负数一个正数取得最大
+class Solution:
+    def max_multi(self,N,l):
+        if N < 3:
+            return None
+        l = sorted(l)
+        res = max(l[-1]*l[-2]*l[-3],l[0]*l[1]*l[-1])
+        return res            
+N = int(input())
+l = list(map(int,input().split()))
+s = Solution()
+a = s.max_multi(N,l)
+print(a)
+
+1、A 国的手机号码由且仅由 N 位十进制数字(0-9)组成。一个手机号码中有至少 K 位数字相同则被定义为靓号。A 国的手机号可以有前导零，比如 000123456 是一个合法的手机号。
+小多想花钱将自己的手机号码修改为一个靓号。修改号码中的一个数字需要花费的金额为新数字与旧数字之间的差值。比如将 1 修改为 6 或 6 修改为 1 都需要花 5 块钱。
+给出小多现在的手机号码，问将其修改成一个靓号，最少需要多少钱？
+
+先找改成哪个数字花费最小，然后根据花费的绝对值排序，先从左往右改比目标值更大的，这样最后结果字典序会小，再从后往前改
+
+def select_phone_number(seq, k):
+    front, rear = min(seq), max(seq)
+    value, compare = 0, float('inf')
+    for cur in range(front, rear+1):
+        subtraction = [abs(cur-su) for su in seq]
+        traction = sorted(subtraction)
+        current = sum(traction[:k])
+        if current < compare:
+            compare = current
+            value = cur
+    pos = [value-su for su in seq]
+    stand = sorted(list(set(map(lambda x: abs(x), pos))))
+    while k > 0:
+        nxt = min(stand)
+        if nxt == 0:
+            k -= pos.count(0)
+            stand.remove(nxt)
+            continue
+        left = value + nxt
+        while k > 0 and left in seq:
+            li = seq.index(left)
+            seq[li] = value
+            k -= 1
+        right = value - nxt
+        while k > 0 and right in seq:
+            ri = len(seq)-1-(seq[::-1].index(right))
+            seq[ri] = value
+            k -= 1
+        stand.remove(nxt)
+    return compare, seq
+ 
+ 
+if __name__ == '__main__':
+    [n, k] = list(map(int, input().strip().split()))
+    seq = list(map(int, list(input().strip())))
+    value, res = select_phone_number(seq, k)
+    print(value)
+    print(''.join(map(lambda ru: str(ru), res)))
+
+2、小多想在美化一下自己的庄园。他的庄园毗邻一条小河，他希望在河边种一排树，共 M 棵。小多采购了 N 个品种的树，每个品种的数量是 Ai (树的总数量恰好为 M)。但是他希望任意两棵相邻的树不是同一品种的。小多请你帮忙设计一种满足要求的种树方案。
+
+先检查是否一个品种的数量大于总数+1的一半，因为这样就不能满足相邻不是一个品种
+然后先找是否有大于总数一半的，要先种下，用flag标记，这一次循环种了树就continue跳出这一轮，不然按顺序循环，只要当前数量不为0且不和前面品种一样就种，字典序会小
+
+m=int(input())
+nums = list(map(int,input().split()))
+sum_nums=sum(nums)
+if 2*max(nums)>(sum_nums+1):
+    print("-")
+else:
+    res=[]
+    pre=-1
+    while sum_nums>0:
+        i=0
+        flag=0
+        while i<m:
+            if 2*nums[i]>sum_nums:
+                res.append(i+1)
+                sum_nums-=1
+                nums[i]-=1
+                pre=i
+                flag=1
+                break
+            else:
+                i+=1
+        if flag==1:
+            continue
+        j=0
+        while nums[j]==0 or j==pre:
+            j+=1
+        res.append(j+1)
+        sum_nums-=1
+        nums[j]-=1
+        pre=j
+print(" ".join(map(str,res)))
+
+3、给定一个长度为偶数的数组arr，将该数组中的数字两两配对并求和，在这些和中选出最大和最小值，请问该如何两两配对，才能让最大值和最小值的差值最小？
+
+排序后首尾组合就会最小
+
+n = int(input())
+arr = list(map(int,input().split()))
+arr.sort()
+value = [arr[i]+arr[-i-1] for i in range(n//2)]
+res = max(value)-min(value)
+print(res)
+
+4、你在玩一个回合制角色扮演的游戏。现在你在准备一个策略，以便在最短的回合内击败敌方角色。在战斗开始时，敌人拥有HP格血量。当血量小于等于0时，敌人死去。一个缺乏经验的玩家可能简单地尝试每个回合都攻击。但是你知道辅助技能的重要性。
+在你的每个回合开始时你可以选择以下两个动作之一：聚力或者攻击。
+    聚力会提高你下个回合攻击的伤害。
+    攻击会对敌人造成一定量的伤害。如果你上个回合使用了聚力，那这次攻击会对敌人造成buffedAttack点伤害。否则，会造成normalAttack点伤害。
+给出血量HP和不同攻击的伤害，buffedAttack和normalAttack，返回你能杀死敌人的最小回合数。
+
+如果buffed小于等于normal的两倍，那么一直攻击就好，如果大于，先用buff，然后判断剩下的能否一个normal解决
+
+HP = int(input())
+normalAttack = int(input())
+buffedAttack = int(input())
+res = 0
+if buffedAttack <= 2*normalAttack:
+    res = HP//normalAttack if HP%normalAttack == 0 else HP//normalAttack+1
+else:
+    res += 2*(HP//buffedAttack)
+    temp = HP%buffedAttack
+    if temp > 0 and temp <= normalAttack:
+        res += 1
+    elif temp > normalAttack:
+        res += 2
+print(res)
