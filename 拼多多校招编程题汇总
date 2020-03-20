@@ -285,3 +285,49 @@ for i in dict_id_sort:
 #dict_items([(0, [4, 4]), (1, [3, 0])])          
 for i in range(num_bear):
     print(dict_bear[i][1])
+
+有两个用字符串表示的非常大的大整数,算出他们的乘积，也是用字符串表示。不能用系统自带的大整数类型。
+大整数相乘，其实完全套用了列竖式计算乘法的思路，重点就是讲竖式计算这一过程用代码表示。竖式计算中，一个乘数会和另一个乘数逐位相乘，从个位到最高位，相乘的结果依次左移一位，最后将多个计算结果相加即可，而左移一位其实就是“×10”，期间同时考虑进位加至前一位。
+data = input().split()
+strA, strB = data[0], data[1]
+lenA, lenB = len(strA), len(strB)
+out = [0]*(lenA+lenB+1)
+if lenA > lenB:
+    strA, strB = strB, strA
+    lenA, lenB = lenB, lenA
+jinwei = 0
+for i in range(lenA):
+    for j in range(lenB):
+        out[i+j] += (int(strA[lenA-1-i])) * (int(strB[lenB-1-j]))
+        out[i+j+1] += out[i+j] // 10
+        out[i+j] %= 10
+out.reverse()
+for i in range(len(out)):
+    if out[i] != 0:
+        print(''.join(str(c) for c in out[i:]))
+        break
+
+六一儿童节，老师带了很多好吃的巧克力到幼儿园。每块巧克力j的重量为w[j]，对于每个小朋友i，当他分到的巧克力大小达到h[i] (即w[j]>=h[i])，
+他才会上去表演节目。老师的目标是将巧克力分发给孩子们，使得最多的小孩上台表演。可以保证每个w[i]> 0且不能将多块巧克力分给一个孩子或将一块分给多个孩子。
+第一行：n，表示h数组元素个数
+ 第二行：n个h数组元素
+ 第三行：m，表示w数组元素个数
+ 第四行：m个w数组元素
+ 
+n = int(input())
+h = [int(x) for x in input().split()]
+m = int(input())
+w = [int(x) for x in input().split()]
+num = 0
+for i in range(n):
+    wmax = max(w)
+    t = h[i]
+    res = t
+    while res<=wmax:
+        if res in w:
+            w[w.index(res)] = -1
+            num += 1
+            break
+        else:
+            res += 1
+print(num)
