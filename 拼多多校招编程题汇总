@@ -129,3 +129,159 @@ else:
     elif temp > normalAttack:
         res += 2
 print(res)
+
+在商城的某个位置有一个商品列表，该列表是由L1、L2两个子列表拼接而成。当用户浏览并翻页时，需要从列表L1、L2中获取商品进行展示。展示规则如下：
+
+1. 用户可以进行多次翻页，用offset表示用户在之前页面已经浏览的商品数量，比如offset为4，表示用户已经看了4个商品
+
+2. n表示当前页面需要展示的商品数量
+
+3. 展示商品时首先使用列表L1，如果列表L1长度不够，再从列表L2中选取商品
+
+4. 从列表L2中补全商品时，也可能存在数量不足的情况
+
+请根据上述规则，计算列表L1和L2中哪些商品在当前页面被展示了
+每个测试输入包含1个测试用例，包含四个整数，分别表示偏移量offset、元素数量n，列表L1的长度l1，列表L2的长度l2。
+在一行内输出四个整数分别表示L1和L2的区间start1，end1，start2，end2，每个数字之间有一个空格。
+
+while True:
+    try:
+        offset, n, l1, l2 = list(map(int,input().split()))
+        s1=e1=s2=e2=0
+        if offset <= l1:
+            if offset+n <= l1:
+                s1,e1,s2,e2 = offset,offset+n,0,0
+            elif offset+n > l1 and offset+n <= l1+l2:
+                s1,e1,s2,e2 = offset,l1,0,offset+n-l1
+            else:
+                s1,e1,s2,e2 = offset,l1,0,l2
+        elif offset > l1 and offset <= l1+l2:
+            if offset+n <= l1+l2:
+                s1,e1,s2,e2 = l1,l1,offset-l1,offset+n-l1
+            else:
+                s1,e1,s2,e2 = l1,l1,offset-l1,l2
+        else:
+            s1,e1,s2,e2 = l1,l1,l2,l2
+        print(s1,e1,s2,e2)
+    except:
+        break
+        
+
+拼多多王国的城市和道路的拓扑结构比较特别，是一个树状结构：
+1. 每个城市是树的一个节点；
+2. 城市之间的道路是树的一条边；
+3. 树的根节点是首都。
+拼多多周年庆马上就要到了，这是拼多多王国的一个大日子。为了活跃气氛，国王想在道路上布置花灯。花灯可是很贵的东西，尽管国王想要在所有道路上都布置花灯，但是如果要花太多钱的话，是过不了财政大臣那一关的。国王把这个计划告诉财政大臣，最后他们商讨出来这么一个方案：
+1. 一条道路要么不布置花灯，要么整条布置花灯，不能选择其中的某一段布置；
+2. 除非没有道路通向首都，否则至少为一条通向首都的道路布置花灯；
+3. 所有布置花灯的道路构成的子图是连通的，这保证国王从首都出发，能通过只走布置了花灯的道路，把所有的花灯游览完； 
+4. 如果某个城市（包括首都）有大于等于2条道路通向子城市，为了防止铺张浪费，最多只能选择其中的两条路布置花灯；
+5. 布置花灯的道路的总长度设定一个上限。
+在上述方案下，国王想要使得布置花灯的道路长度越长越好，你帮国王想想办法。
+
+dfs搜索所有可能路径的长度值。包括一个节点所有的儿子中选1个儿子，选2个儿子的情况（最多只能选择两条路布置）。
+步骤如下：
+根据输入，得到所有节点的父节点字典和两两节点连通关系字典；
+找到根节点；
+children集合维护每个节点的所有孩子节点，sets记录每个子节点的候选路径列表，对于候选路径集合，枚举三种情况：
+一个子节点都不选：则cand集合里面插入0；
+只选择一个子节点：枚举所有子节点，将子节点候选列表里的所有路径长度都加上其父节点到此子节点路径长度，然后再插入父节点的候选集合列表；
+选择两个子节点：枚举所有两两子节点组合，把两子节点的候选集合排列组合相加，再加上各自到父节点路径长度，存入父节点候选集合列表。
+找出根节点候选集合中不超过上限值的最大值，即为答案。
+
+from collections import defaultdict
+
+limit = int(input())
+city = int(input())
+tree = defaultdict(lambda :dict())
+parent = {}
+visited = {}
+root = None
+
+# build tree
+for _ in range(city - 1):
+    s = input().split()
+    u, v, d = int(s[0]), int(s[1]), int(s[2])
+    if d > limit:
+        continue
+    if not root:
+        root = u
+    parent[v] = u
+    tree[u][v] = d
+
+# find root
+while parent.get(root, -1) != -1:
+    root = parent.get(root)
+    
+'''
+cand：候选队列，存放当前节点的所有可能路径长度
+children：存放以当前节点为根节点的所有的子节点
+sets：存放以当前节点为根节点的子树下，每个孩子节点的候选队列
+'''
+def dfs(u):
+    if u not in visited:
+        cand = set()
+        cand.add(0)
+        if u in tree:
+            sets = []
+            children = []
+            for v in tree[u]:
+                children.append(v)
+                sets.append(dfs(v))
+            for i in range(len(sets)):
+                d = tree[u][children[i]]
+                for c in sets[i]:
+                    if d + c <= limit:
+                        cand.add(d + c)
+                for j in range(i + 1, len(sets)):
+                    d2 = tree[u][children[j]]
+                    for c in sets[i]:
+                        for c2 in sets[j]:
+                            if c + c2 + d + d2 <= limit:
+                                cand.add(c + c2 + d + d2)
+        visited[u] = cand
+    return visited[u]
+
+print(max(dfs(root)))
+
+给出平面上的n个点，现在需要你求出，在这n个点里选3个点能构成一个三角形的方案有几种。
+遍历所有三点组合，三点不共线即可组成三角形
+判断三点是否共线：两条线段斜率是否相等？ (x1-x2) * (y1-y3) = (y1-y2) * (x1-x3)
+
+from itertools import combinations
+n = int(input())
+dot = []
+count =0
+for i in range(n):
+    dot.append(list(map(int,input().split())))
+index = [i for i in range(n)]
+combine = list(combinations(index,3))
+for j in combine:
+    if (dot[j[0]][0]-dot[j[1]][0])*(dot[j[0]][1]-dot[j[2]][1])!=(dot[j[0]][1]-dot[j[1]][1])*(dot[j[0]][0]-dot[j[2]][0]):
+        count += 1
+
+print(count)
+
+有n只小熊，他们有着各不相同的战斗力。每次他们吃糖时，会按照战斗力来排，战斗力高的小熊拥有优先选择权。前面的小熊吃饱了，后面的小熊才能吃。每只小熊有一个饥饿值，每次进食的时候，小熊们会选择最大的能填饱自己当前饥饿值的那颗糖来吃，可能吃完没饱会重复上述过程，但不会选择吃撑。
+现在给出n只小熊的战斗力和饥饿值，并且给出m颗糖能填饱的饥饿值。
+求所有小熊进食完之后，每只小熊剩余的饥饿值。
+num_bear,num_sugar = map(int,input().split())
+
+sugar = list(map(int,input().split()))
+sugar.sort(reverse=True)
+dict_bear = dict()
+i = 0
+for line in range(num_bear):
+    fight,hungry = map(int,input().split())
+    dict_bear[i] =   [fight,hungry]
+    i += 1
+dict_id_sort = [i[0] for i in sorted(dict_bear.items(),key = lambda x:x[1][0],reverse=True)]
+
+for i in dict_id_sort:
+    for j in range(num_sugar):
+        if dict_bear[i][1] >= sugar[j]:
+            dict_bear[i][1] -= sugar[j]
+            sugar[j] = 0
+#dict_items([(0, [4, 4]), (1, [3, 0])])          
+for i in range(num_bear):
+    print(dict_bear[i][1])
